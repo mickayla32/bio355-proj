@@ -1,0 +1,7 @@
+---
+output: html_document
+---
+
+<center>
+![](../pics/legend_agri_exp.png)
+<center>

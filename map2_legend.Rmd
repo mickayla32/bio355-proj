@@ -1,0 +1,8 @@
+---
+output: html_document
+---
+
+Legend
+<center>
+![](../pics/legend.png)
+<center>

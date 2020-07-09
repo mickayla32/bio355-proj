@@ -1,0 +1,8 @@
+---
+output: html_document
+---
+
+A variety of bird species, typically grassland and shrubland species, are declining as a result of the loss of small-scale farming operations, and thus, an increase in high-impact agriculture (Murphy, 2003). Studies have found that bird species’ productivity, population size, and community structure are impacted by shifting agricultural practices, such as earlier and more frequent mowing (Murphy 2003), which result in a decrease in quality nesting habitat for birds. 
+
+
+Previous studies have found that expanding agricultural practices led to the decline of red-winged blackbirds and other grassland species, as breeding habitats are impacted (Blackwell and Dolbeer 2001; Murphy 2003). 

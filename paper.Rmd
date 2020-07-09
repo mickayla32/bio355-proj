@@ -1,0 +1,1015 @@
+---
+title: "Final_Paper"
+author: "Mickayla Johnston"
+date: "5/12/2020"
+output: html_document
+---
+```{r, echo = FALSE, message = FALSE, warning = FALSE, include = FALSE}
+# Libraries
+library(dplyr)
+library(ggplot2)
+library(tmap)
+library(rsconnect)
+library(shinydashboard)
+library(lubridate)
+library(leaflet)
+library(sf)
+library(rlang)
+library(dataRetrieval)
+library(leaflet.extras)
+library(devtools)
+library(reshape)
+library(readr)
+library(sp)
+library(FactoMineR)
+library(factoextra)
+library(corrplot)
+library(tidyverse)
+library(missMDA) # A new library?
+library(DT)
+library(car)
+library(visreg) # A new library not taught in class
+library(broom)
+library(DHARMa)
+library(piecewiseSEM)
+```
+
+### Introduction  
+
+##### The Dataset  
+
+My dataset comes from my work for the first chapter of my Master's thesis, where I am exploring the relationship between land cover type and red-winged blackbird (*Agelaius phoeniceus*) occurrence. This data was collected from the citizen science website, eBird, and combined with ArcGIS data using the application ArcMap. The dataset contains variables including mean human impact, precipitation, temperature, and elevation; information supplied from the eBird Basic Dataset (EBD) and the eBird Reference Dataset (ERD), which includes information such as last edited date, country, state, and county, and the accompanying codes, locality, latitude and longitude, observation date and time, unique observer ID and Sampling Event Identifier, the protocol type and code, the project code, duration and distance traveled by the observer(s), the number of observers and their group identifier, whether all species observed were recorded, comments, scientific name of the species observed, count data, and species observed/ presence/absence. This is combined with percent land cover type associated with each unique presence/absence data point, using a variety of land cover classifications, including general land cover types, anthropogenic land cover types, and wetland types. Each of these three land cover type categories include a column of total area, which was used to calculate the percentage of each land cover type associated with each observation point.  
+
+Data collected through eBird is done on a volunteer basis, and is therefore considered "citizen science data." eBird is intended for anyone, anywhere in the world, to share their findings collected while birding. As explained on the [eBird website](https://ebird.org/about), "Birders enter when, where, and how they went birding, and then fill out a checklist of all the birds seen and heard during the outing" (Sullivan et al., 2009). Participating birders can use eBird's free phone application to complete their checklist or can enter their sighting data on the eBird website.  
+
+eBird assists birders by providing a filtered checklist of possible species, depending on the birder's location, date and time. High species counts and rare bird sightings are reviewed by experts to ensure data quality and accuracy. Along with this, the eBird website provides a variety of resources at [their help center](https://support.ebird.org/en/support/home), where participating birders can learn more about [what protocol is right for them](https://support.ebird.org/en/support/solutions/articles/48000950859-guide-to-ebird-protocols), how to provide a ["Complete Checklist"](https://support.ebird.org/en/support/solutions/articles/48000967748-birding-as-your-primary-purpose-and-complete-checklists), and more. All of these aspects are important in terms of thinking about the data collection process, quality, and accuracy.  
+
+The land cover data within the dataset was collected from various web sources, and transformed into a useful format using the program ArcMap. First, data for general land cover types were collected from the Commission for Environmental Cooperation's (CEC) [North America land cover 2010 map](http://www.cec.org/tools-and-resources/map-files/land-cover-2010-landsat-30m) (Commission for Environmental Cooperation (CEC), 2010), anthropogenic land cover types were collected from Socioeconomic Data and Applications Center's (SEDAC) [Anthropogenic Biomes of the World, v1: North America](https://sedac.ciesin.columbia.edu/data/set/anthromes-anthropogenic-biomes-world-v1/maps) (Ellis & Ramankutty, 2008), wetland data (though not used in this project) was collected from the Global Lakes and Wetlands Database's (GLWD) [Lakes and Wetlands Grid: Level 3](https://www.worldwildlife.org/publications/global-lakes-and-wetlands-database-lakes-and-wetlands-grid-level-3) (Lehner & Döll, 2004). Environmental variable data, including human impact index (HII) data was collected from the CEC's [Human Influence on Terrestrial Ecosystems](http://www.cec.org/tools-and-resources/map-files/human-influence-terrestrial-ecosystems) data (The last of the Wild Data Version 2, 2005). This data is, as stated on the CEC's website "based on population density, built-up areas, roads, railroads, navigable rivers, coastlines, land use/land cover, and nighttime lights. HII values range from 0-64, with 0 representing no human influence, and 64 representing the maximum human influence..." (The last of the Wild Data Version 2, 2005). Data on precipitation, temperature, and elevation were also collected (sources for these are unknown, as they are on a computer at Umass that I can't access now). Using ArcMap, these data sources were converted into percentages corresponding to each unique data point.  
+
+Overall, the datastet includes presence/absence data from eBird (for red-winged blackbirds), and all accompanying data, environmental variable data (precipitation, elevation, temperature, and human impact), and land cover type (general, anthropogenic, and wetlands) percentages related to each unique eBird data point.  
+
+##### The Questions
+Using this combination of presence/absence data and land cover type percentages, I wanted the user to be able to explore the relationship between the two. Specifically, I intend to answer the question, "How well does land cover type predict red-winged blackbird occurrence across the species' range?" From here, I'm also interested in exploring how increasing anthropogenic disturbances may impact red-winged blackbirds, as previous studies have already found a decrease in red-winged blackbird populations in areas of increasing agricultural intensification (Blackwell & Dolbeer, 2001; Murphy, 2003). For this reason, I included maps on agricultural expansion, along with anthropogenic land cover maps, to allow the user to visualize where presence points fall in relation to these different land cover variables. After visualizing this with a variety of maps, the "Plots" and "Statistics" tabs provide more in-depth information on how exactly red-winged blackbird occurrence relates to these different land cover types.  
+
+Specifically, I chose to explore this question because bird species’ distributions are dependent on a variety of biotic and abiotic conditions, such as interspecific and intraspecific species interactions, climate variables, ecoregions, land-use, and land cover variables. Such variables are drivers of habitat type and availability, vegetation type, predator occurrence, and more, all of which appear to be important factors in determining bird species’ distributions (Kent, Bar-Massada, & Carmel, 2014).
+
+Aside from climate variables and interspecies interactions, land cover appears to be an important factor in terms of predicting bird species’ occurrence and distributions (Rich & Currie, 2018). This is due to the fact that it can be a useful means for understanding and predicting changes in habitat type, as they relate to a particular species (EPA, 2013). Many studies, including Blackwell & Dolbeer (2001), Berg et al. (2015), Assandri et al. (2017), and Rittenhouse et al. (2012), have related land cover and changes in land cover to shifts in occurrence of a variety of bird species.  
+I therefore chose to explore how land cover type is related to the occurrence of a widespread avian species, the red-winged blackbird, which is likely to continue to be impacted by shifts in land cover types as a result of increasing anthropogenic disturbances.
+
+
+#### Summary Information  
+I included this histogram in my app, as I think it provides interesting information in terms of how red-winged blackbird occurrence differs by country and month, as a result of their migration and mating season. This is important to keep in mind, as there are many variables that influence bird occurrence/ distribution.
+```{r, echo= FALSE, warning=FALSE}
+
+#data
+load("../data/ebd_merged_clean_4.RData")
+ebd_merged_clean_4$year <- year(ymd(ebd_merged_clean_4$observation_date))
+ebd_merged_clean_4$month <- month(ymd(ebd_merged_clean_4$observation_date)) 
+ebd_merged_clean_4$day <- day(ymd(ebd_merged_clean_4$observation_date))
+
+#fix month names
+ebd_merged_clean_4 <- ebd_merged_clean_4 %>%
+  mutate("month_name" = month.abb[month])
+
+ebd_merged_clean_4$month_name <- factor(ebd_merged_clean_4$month_name, levels = c("Jan", "Feb", "Mar", "Apr",
+                                                                                  "May", "Jun", "Jul", "Aug", "Sep",
+                                                                                  "Oct", "Nov", "Dec"))
+
+
+# filter ebd
+filtered_ebd <- ebd_merged_clean_4 %>%
+  
+  # each point is 1 rwbb sighting-- pres_abs = 1
+  filter(pres_abs == 1)
+
+
+# plot it
+ggplot(data = filtered_ebd,
+       mapping = aes(x = month_name)) +
+  geom_histogram(stat = "count", color = "red", fill = "#FFC583") + 
+  facet_wrap(~ country, scales = "free_y", nrow = 3) +
+  labs(x = "Month", y = "Number of Sightings") +
+  theme_minimal()
+```
+
+\
+
+Map of all red-winged blackbird sightings, across the species' range.
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+tmap_mode("view")
+
+sf_filtered_ebd <- filtered_ebd %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
+
+map1 <- tm_shape(sf_filtered_ebd) +
+  tm_dots(col = "pres_abs", size = 0.02, title = "RWBB Sighting")
+
+map1
+```
+
+##### Some summary statistics:  
+```{r,echo = FALSE}
+lc_mod <- glm(pres_abs ~ p_temp_needleleaf_forest +
+                p_subpolartaiga_needleleaf_forest +
+                p_trop_broad_evergreen + 
+                p_trop_broad_deciduous +
+                p_temp_broad_deciduous +
+                p_mixed_forest +
+                p_trop_shrubland +
+                p_temp_shrubland +
+                p_trop_grassland +
+                p_temp_grassland +
+                p_wetland +
+                p_cropland +
+                p_barren.x +
+                p_urban.x,
+              data = ebd_merged_clean_4, 
+              family = binomial(link = "logit"))
+
+resids <- simulateResiduals(lc_mod)
+
+plotQQunif(resids)
+plotResiduals(resids)
+```
+
+\
+
+#### Methods  
+
+Data collected from eBird was filtered using the package ```auk``` (Strimas-Mackey, Miller, Hochachka, 2018). The following filters were set: Data was filtered to include the species red-winged blackbird; the countries US, CA, MX, GT, BZ, SV, HN, NI, CR, and BS, with a latitude and longitude boundary of 8°00'00.0"N 172°00'00.0"W, and 72°00'00.0"N 52°00'00.0"W. The date range was set to January 1, 2015 to June 1, 2018 (which included the most reliable and up-to-date data at the time of processing). Checklist protocol was set to “travelling;” start time was set to 4:00 AM to 8:00 PM; duration was set to 25 minutes to 180 minutes; distance was set to 0 kilometers to 8 kilometers; and the “auk_complete” function was used, thus ensuring only checklists “in which all birds seen or heard were recorded” (Strimas-Mackey et al., 2019). These filters were chosen in order to include the most accurate, and stringent data collection methods were being used. EBD was then combined with the eBird Reference Dataset (ERD), which includes zero-filled and landscape data (https://ebird.org/data/download/erd).  
+
+Data collected for use in GIS included the following maps: North America Landcover, 2010 (Landstat, 30m) (CEC, 2010); Global human influence index (HII) (The Last of the Wild, Version 2, 2005); Anthropogenic Biomes of the World, v1: North America (Ellis & Ramankutty, 2008); Lakes and Wetlands Grid: Level 3 (Lehner & Döll, 2004). See Intro for more details.
+
+After compiling the eBird and land cover data in ArcMap, data was joined using the function ``` rbind()``` in R (not included here, but just combined GIS land cover values with the eBird data, for each unique observation point), and then manipulated in R, in order to conduct statistical analyses. The follow code was used: (Note that this first portion of data cleaning was completed by a colleague, Key Duckworth, in 2019...which is why functions aren't used in place of repeated code).  
+
+\
+
+Load in the un-cleaned data
+```{r, warning = FALSE, run = FALSE}
+load("../data/ebd_merged_2.RData")
+df<-ebd_merged_2
+```
+
+\
+
+Trim columns with repetitive names that dont add value 
+```{r, warning = FALSE, run = FALSE}
+dft<-df[, !(colnames(df) %in% c("OID.x","OID.y","ZONE_CODE.x","ZONE_CODE.x","ZONE_CODE.x", "ZONE_CODE.y","COUNT.x","COUNT.y","AREA.x","AREA.y"))]    
+```
+
+\
+
+Create numeric pres_abs column (0 for absence, 1 for presence)
+```{r, warning = FALSE, run = FALSE}
+dfx<-mutate(dft, pres_abs = ifelse(species_observed =="TRUE",1,0))
+```
+
+\
+
+Add column with total land cover area (to use in calculation of percent)
+```{r, warning = FALSE, run = FALSE}
+dfx<-mutate(dfx,total_area_landcover = unclass+temp_needleleaf_forest+subpolartaiga_needleleaf_forest+trop_broad_evergreen+
+  trop_broad_deciduous+temp_broad_deciduous+mixed_forest+trop_shrubland+temp_shrubland+trop_grassland+
+  temp_grassland+polar_shrub_moss+polar_grass_moss+polar_barren_moss+wetland+cropland+barren.x+urban.x+
+  water+snow)
+```
+
+\
+
+Add columns of percent of each land cover type
+```{r, warning = FALSE, run = FALSE}
+#1
+dfx<-mutate(dfx, p_unclass = unclass / total_area_landcover)
+#2
+dfx<-mutate(dfx, p_temp_needleleaf_forest= temp_needleleaf_forest/ total_area_landcover)
+#3
+dfx<-mutate(dfx, p_subpolartaiga_needleleaf_forest= subpolartaiga_needleleaf_forest/ total_area_landcover)
+#4
+dfx<-mutate(dfx, p_trop_broad_evergreen= trop_broad_evergreen/ total_area_landcover)
+#5
+dfx<-mutate(dfx, p_trop_broad_deciduous= trop_broad_deciduous/ total_area_landcover)
+#6
+dfx<-mutate(dfx, p_temp_broad_deciduous= temp_broad_deciduous/ total_area_landcover)
+#7
+dfx<-mutate(dfx, p_mixed_forest= mixed_forest/ total_area_landcover)
+#8
+dfx<-mutate(dfx, p_trop_shrubland= trop_shrubland/ total_area_landcover)
+#9
+dfx<-mutate(dfx, p_temp_shrubland= temp_shrubland / total_area_landcover)
+#10
+dfx<-mutate(dfx, p_trop_grassland= trop_grassland/ total_area_landcover)
+#11
+dfx<-mutate(dfx, p_temp_grassland= temp_grassland/ total_area_landcover)
+#12
+dfx<-mutate(dfx, p_polar_shrub_moss= polar_shrub_moss/ total_area_landcover)
+#13
+dfx<-mutate(dfx, p_polar_grass_moss= polar_grass_moss/ total_area_landcover)
+#14
+dfx<-mutate(dfx, p_polar_barren_moss= polar_barren_moss/ total_area_landcover)
+#15
+dfx<-mutate(dfx, p_wetland= wetland/ total_area_landcover)
+#16
+dfx<-mutate(dfx, p_cropland= cropland/ total_area_landcover)
+#17
+dfx<-mutate(dfx, p_barren.x= barren.x/ total_area_landcover)
+#18
+dfx<-mutate(dfx, p_urban.x= urban.x/ total_area_landcover)
+#19
+dfx<-mutate(dfx, p_water= water/ total_area_landcover)
+#20
+dfx<-mutate(dfx, p_snow= snow/ total_area_landcover)
+```
+
+\
+
+Check that percents add to 100
+```{r, warning = FALSE, run = FALSE}
+dfx<-mutate(dfx,p_sum_landcover = p_unclass+p_temp_needleleaf_forest+p_subpolartaiga_needleleaf_forest+p_trop_broad_evergreen+
+                p_trop_broad_deciduous+p_temp_broad_deciduous+p_mixed_forest+p_trop_shrubland+p_temp_shrubland+p_trop_grassland+
+                p_temp_grassland+p_polar_shrub_moss+p_polar_grass_moss+p_polar_barren_moss+p_wetland+p_cropland+p_barren.x+p_urban.x+
+                p_water+p_snow)
+
+summary(dfx$p_sum_landcover)
+
+```
+
+\
+
+Wetlands
+```{r, warning = FALSE, run = FALSE}
+names(dfx)[names(dfx) == '50_100_wetland'] <- 'wetland_50_100'
+names(dfx)[names(dfx) == '25_50_wetland'] <- 'wetland_25_50'
+#names(dfx)[names(dfx) == '0_25_wetland'] <- 'wetland_0_25'
+```
+
+\
+
+Add column with total wetland area (to use in calculation of percent) - omitting "swamp_forest" and "wetland_0_25" because no records exist for these wetland types
+```{r, warning = FALSE, run = FALSE}
+dfx<-mutate(dfx,total_area_wetland = lake+reservoir+river+fresh_marsh+coatsal_wetland+saline_wetland+
+              bog_fen_mire+intermittent_wetland+wetland_50_100+wetland_25_50)              
+```              
+
+\
+
+Create percent columns
+```{r, warning = FALSE, run = FALSE}
+dfx<-mutate(dfx, p_lake = lake / total_area_wetland)
+dfx<-mutate(dfx, p_reservoir = reservoir / total_area_wetland)
+dfx<-mutate(dfx, p_river = river / total_area_wetland)
+dfx<-mutate(dfx, p_fresh_marsh = fresh_marsh / total_area_wetland)
+dfx<-mutate(dfx, p_coatsal_wetland = coatsal_wetland / total_area_wetland)
+dfx<-mutate(dfx, p_saline_wetland = saline_wetland / total_area_wetland)
+dfx<-mutate(dfx, p_bog_fen_mire = bog_fen_mire / total_area_wetland)
+dfx<-mutate(dfx, p_intermittent_wetland = intermittent_wetland / total_area_wetland)
+dfx<-mutate(dfx, p_wetland_50_100 = wetland_50_100 / total_area_wetland)
+dfx<-mutate(dfx, p_wetland_25_50 = wetland_25_50 / total_area_wetland)
+```
+
+\
+
+Check that percents add to 100
+```{r, warning = FALSE, run = FALSE}
+dfx<-mutate(dfx,p_sum_wetland = p_lake+p_reservoir+p_river+p_fresh_marsh+p_coatsal_wetland+p_saline_wetland+
+              p_bog_fen_mire+p_intermittent_wetland+p_wetland_50_100+p_wetland_25_50)
+
+summary(dfx$p_sum_wetland)
+
+```
+
+\
+
+Add column with total anthropogenic biome area (to use in calculation of percent)
+```{r, warning = FALSE, run = FALSE}
+dfx<-mutate(dfx,total_area_abiome =urban.y+
+            dense_settlement+
+            irrigated_village+
+            cropped_pastoral_village+
+            pastoral_village+
+            rainfed_village+
+            rainfed_mosaic_village+
+            residential_irrigated_cropland+
+            residential_rainfed_mosaic+
+            populated_irrigated_cropland+
+            populated_rainfed_cropland+
+            remote_cropland+
+            residential_rangeland+
+            populated_rangeland+
+            remote_rangeland+
+            populated_forest+
+            remote_forest+
+            wild_forest+
+            sparse_trees+
+            barren.y)
+```
+
+\
+
+Create percent columns
+```{r, warning = FALSE, run = FALSE}
+dfx<-mutate(dfx, p_urban.y = urban.y / total_area_abiome)
+dfx<-mutate(dfx, p_dense_settlement = dense_settlement / total_area_abiome)
+dfx<-mutate(dfx, p_irrigated_village = irrigated_village / total_area_abiome)
+dfx<-mutate(dfx, p_cropped_pastoral_village = cropped_pastoral_village / total_area_abiome)
+dfx<-mutate(dfx, p_pastoral_village = pastoral_village / total_area_abiome)
+dfx<-mutate(dfx, p_rainfed_village = rainfed_village / total_area_abiome)
+dfx<-mutate(dfx, p_rainfed_mosaic_village = rainfed_mosaic_village / total_area_abiome)
+dfx<-mutate(dfx, p_residential_irrigated_cropland = residential_irrigated_cropland / total_area_abiome)
+dfx<-mutate(dfx, p_residential_rainfed_mosaic = residential_rainfed_mosaic / total_area_abiome)
+dfx<-mutate(dfx, p_populated_irrigated_cropland = populated_irrigated_cropland / total_area_abiome)
+dfx<-mutate(dfx, p_populated_rainfed_cropland = populated_rainfed_cropland / total_area_abiome)
+dfx<-mutate(dfx, p_remote_cropland = remote_cropland / total_area_abiome)
+dfx<-mutate(dfx, p_residential_rangeland = residential_rangeland / total_area_abiome)
+dfx<-mutate(dfx, p_populated_rangeland = populated_rangeland / total_area_abiome)
+dfx<-mutate(dfx, p_remote_rangeland = remote_rangeland / total_area_abiome)
+dfx<-mutate(dfx, p_populated_forest = populated_forest / total_area_abiome)
+dfx<-mutate(dfx, p_remote_forest = remote_forest / total_area_abiome)
+dfx<-mutate(dfx, p_wild_forest = wild_forest / total_area_abiome)
+dfx<-mutate(dfx, p_sparse_trees = sparse_trees / total_area_abiome)
+dfx<-mutate(dfx, p_barren.y = barren.y / total_area_abiome)
+```
+
+\
+
+Check that percents add to 100
+```{r, warning = FALSE, run = FALSE}
+dfx<-mutate(dfx,p_sum_abiome = p_urban.y+
+              p_dense_settlement+
+              p_irrigated_village+
+              p_cropped_pastoral_village+
+              p_pastoral_village+
+              p_rainfed_village+
+              p_rainfed_mosaic_village+
+              p_residential_irrigated_cropland+
+              p_residential_rainfed_mosaic+
+              p_populated_irrigated_cropland+
+              p_populated_rainfed_cropland+
+              p_remote_cropland+
+              p_residential_rangeland+
+              p_populated_rangeland+
+              p_remote_rangeland+
+              p_populated_forest+
+              p_remote_forest+
+              p_wild_forest+
+              p_sparse_trees+
+              p_barren.y)
+
+summary(dfx$p_sum_abiome)
+
+```
+
+\
+
+Save 
+```{r, warning = FALSE, run = FALSE}
+ebd_merged_3<-dfx
+
+save(ebd_merged_3, file = "ebd_merged_3.RData")
+```
+
+\
+
+2. CLEANING DATA
+
+\
+
+Remove rows without land cover data 
+```{r, warning = FALSE, run = FALSE}
+summary(dfx$p_sum_landcover)
+dfc<-subset(dfx, !is.na(p_sum_landcover))
+```
+
+
+\
+
+Remove non-percentage land cover, wetland, and anthropogenic biome columns to reduce confusion
+```{r, warning = FALSE, run = FALSE}
+names(dfc[c(3:32, 38:58)])
+dfc<-dfc[-c(3:32, 38:58)]
+```
+
+
+\
+
+SAVE
+```{r, warning = FALSE, run = FALSE}
+ebd_merged_clean_1<-dfc
+save(ebd_merged_clean_1, file = "ebd_merged_clean_1.RData")
+```
+
+\
+
+Exclude rows with 50-100% unclassified 'p_unclass' land cover (low quality land cover data)
+NOTE: REMOVING THESE ROWS REMOVES ALL RECORDS FROM "El Salvador","Honduras","Belize","Nicaragua", AND "Bahamas"
+```{r, warning = FALSE, run = FALSE}
+dfc<-subset(dfc, p_unclass<.5)
+```
+
+\
+
+You can see which countries have remaining records using:
+```{r, warning = FALSE, run = FALSE}
+x <- unique(dfc$country)
+x
+```
+
+\
+
+Check how many records remain for Guatemala
+```{r, warning = FALSE, run = FALSE}
+x<-subset(dfc, country=="Guatemala")
+```
+
+\
+
+Because there is only one record we are going to eliminate it
+```{r, warning = FALSE, run = FALSE}
+dfc<-subset(dfc, country !="Guatemala")
+```
+
+
+\
+
+SAVE
+```{r, warning = FALSE, run = FALSE}
+ebd_merged_clean_2<-dfc
+save(ebd_merged_clean_2, file = "ebd_merged_clean_2.RData")
+```
+
+\
+
+3. ADD BREEDING SEASON VAR AND CONVERT PERCENTAGES
+```{r, warning = FALSE, run = FALSE}
+dfx<-ebd_merged_clean_2
+```
+
+\
+
+Add a variable for breeding season to the main dataframe(dfx)
+```{r, warning = FALSE, run = FALSE}
+dfx<-mutate(dfx, breeding_season= ifelse((observation_date > "2015-05-02" & observation_date < "2015-08-04")|
+                                           (observation_date > "2016-05-02" & observation_date < "2016-08-04")|
+                                           (observation_date > "2017-05-02" & observation_date < "2017-08-04")|
+                                           (observation_date > "2018-05-02" & observation_date < "2018-08-04")|
+                                           (observation_date > "2019-05-02" & observation_date < "2019-08-04"),"breeding season", "non-breeding season"))
+```
+
+\
+
+Convert decimal percents (out of 1.0) to traditional percents (out of 100)
+```{r, warning = FALSE, run = FALSE}
+dfp<-mutate(dfx, p_temp_needleleaf_forest=p_temp_needleleaf_forest*100)
+dfp<-mutate(dfp,p_trop_broad_deciduous =p_trop_broad_deciduous*100)
+dfp<-mutate(dfp, p_temp_broad_deciduous=p_temp_broad_deciduous*100)
+dfp<-mutate(dfp, p_mixed_forest=p_mixed_forest*100)
+dfp<-mutate(dfp, p_temp_shrubland=p_temp_shrubland*100)
+dfp<-mutate(dfp, p_trop_grassland=p_trop_grassland*100)
+dfp<-mutate(dfp, p_temp_grassland=p_temp_grassland*100)
+dfp<-mutate(dfp, p_wetland=p_wetland*100)
+dfp<-mutate(dfp, p_cropland=p_cropland*100)
+dfp<-mutate(dfp, p_urban.x=p_urban.x*100)
+dfp<-mutate(dfp, p_water=p_water*100)
+```
+
+\
+
+SAVE
+```{r, warning = FALSE, run = FALSE}
+save(dfp, file = "dfp.RData")
+
+ebd_merged_clean_3<-dfp
+save(ebd_merged_clean_3, file = "ebd_merged_clean_3.RData")
+```
+
+\
+
+Convert decimal percents (out of 1.0) to traditional percents (out of 100)
+```{r, warning = FALSE, run = FALSE}
+dfx<-ebd_merged_clean_3
+
+dfp<-mutate(dfx, p_urban.y=p_urban.y*100)
+dfp<-mutate(dfp,p_dense_settlement =p_dense_settlement*100)
+dfp<-mutate(dfp, p_irrigated_village=p_irrigated_village*100)
+dfp<-mutate(dfp, p_cropped_pastoral_village=p_cropped_pastoral_village*100)
+dfp<-mutate(dfp, p_pastoral_village=p_pastoral_village*100)
+dfp<-mutate(dfp, p_rainfed_village=p_rainfed_village*100)
+dfp<-mutate(dfp, p_rainfed_mosaic_village=p_rainfed_mosaic_village*100)
+dfp<-mutate(dfp, p_residential_irrigated_cropland=p_residential_irrigated_cropland*100)
+dfp<-mutate(dfp, p_residential_rainfed_mosaic=p_residential_rainfed_mosaic*100)
+dfp<-mutate(dfp, p_populated_irrigated_cropland=p_populated_irrigated_cropland*100)
+dfp<-mutate(dfp, p_populated_rainfed_cropland=p_populated_rainfed_cropland*100)
+dfp<-mutate(dfp, p_remote_cropland=p_remote_cropland*100)
+dfp<-mutate(dfp, p_residential_rangeland=p_residential_rangeland*100)
+dfp<-mutate(dfp, p_populated_rangeland=p_populated_rangeland*100)
+dfp<-mutate(dfp, p_remote_rangeland=p_remote_rangeland*100)
+dfp<-mutate(dfp, p_populated_forest=p_populated_forest*100)
+dfp<-mutate(dfp, p_remote_forest=p_remote_forest*100)
+dfp<-mutate(dfp, p_wild_forest=p_wild_forest*100)
+dfp<-mutate(dfp, p_sparse_trees=p_sparse_trees*100)
+dfp<-mutate(dfp, p_barren.y=p_barren.y*100)
+```
+
+\
+
+While we are here lets add pres_abs_2
+```{r, warning = FALSE, run = FALSE}
+dfp$pres_abs_2<-as.factor(dfp$pres_abs)
+```
+
+\
+
+SAVE
+```{r, warning = FALSE, run = FALSE}
+ebd_merged_clean_4<-dfp
+save(ebd_merged_clean_4, file = "ebd_merged_clean_4.RData")
+```
+
+\
+
+##### This leaves me with the final dataset, ```ebd_merged_clean_4```. From here, I did some small data manipulations for the purposes of my app:
+
+\
+
+Load in the data
+```{r, warning = FALSE, run = FALSE}
+load("../data/ebd_merged_clean_4.RData")
+```
+
+\
+
+Add year, month, day columns
+```{r, warning = FALSE, run = FALSE}
+ebd_merged_clean_4$year <- year(ymd(ebd_merged_clean_4$observation_date))
+ebd_merged_clean_4$month <- month(ymd(ebd_merged_clean_4$observation_date)) 
+ebd_merged_clean_4$day <- day(ymd(ebd_merged_clean_4$observation_date))
+```
+
+\
+
+Added month abbreviations for use in histogram
+```{r, warning = FALSE, run = FALSE}
+ebd_merged_clean_4 <- ebd_merged_clean_4 %>%
+  mutate("month_name" = month.abb[month])
+
+ebd_merged_clean_4$month_name <- factor(ebd_merged_clean_4$month_name, levels = c("Jan", "Feb", "Mar", "Apr",
+                                                                                  "May", "Jun", "Jul", "Aug", "Sep",
+                                                                                  "Oct", "Nov", "Dec"))
+```
+
+\
+
+For the Explore Maps tab map, so that the only points are presence points, to reduce clutter:
+```{r, warning = FALSE, run = FALSE}
+filtered_ebd <- ebd_merged_clean_4 %>%
+  
+  # each point is 1 rwbb sighting-- pres_abs = 1
+  filter(pres_abs == 1)
+```
+
+\
+
+Filtered for the land cover tab, to have US only (the land cover map for this tab is only of the US)
+```{r, warning = FALSE, run = FALSE}
+filtered_ebd_us <- ebd_merged_clean_4 %>%
+  filter(country == "United States",
+         pres_abs == 1)
+```
+
+\
+
+##### Next, I prepared the data to make my logistic regressions. This process was repeated for land cover types, anthropogenic land cover types, and environmental variables:
+
+\
+
+Make a new dataframe with only columns that you want to include in the matrix.    
+For this first matrix we are going to use only the interval variables
+```{r, warning = FALSE}
+dfc<-ebd_merged_clean_4
+
+# Check desired column number(s)
+names(dfc[c(1:7,9,12,40,41)])
+
+# Create a data frame with only desired variables
+dfy<-dfc[c(1:7,9,12,40,41)]
+
+# Check that you have the correct columns in your new data frame
+names(dfy)
+```
+
+\
+
+Convert to data.frame
+```{r, warning = FALSE}
+dfy <- as.data.frame(dfy) 
+```
+
+\
+
+Change variable names
+```{r, warning = FALSE}
+
+dfy <- dfy %>%
+  dplyr::rename(`Human Impact Mean` = hii_mean,
+                `Mean Temp` = temp_mean,
+                `Min Temp` = temp_min,
+                `Max Temp` = temp_max,
+                `Precipitation` = precip,
+                `Elevation` = elevation)
+
+names(dfy)
+```
+
+\
+
+Use the melt function to stack data
+```{r, warning = FALSE}
+melt_dfy<-melt(dfy, id = c("chckls","species_observed", "country", "state_code","pres_abs"))
+```
+
+\
+
+Check columns
+```{r, warning = FALSE}
+
+# note: in the output you should see: (a) preserved columns, (b)"variable", and (c) "value"
+names(melt_dfy)
+```
+
+\
+
+##### Lastly, I conducted a PCA on my anthropogenic land cover data to simplify the model. I kept all of the anthropogenic land cover types for the raw data logistic regressions, because I believe those results are still interesting, but to make the model work properly and reduce the number of predictor variables, I used the PC1 from this PCA.  
+
+\
+
+Get the relevant columns (variables) from the dataset for PCA
+```{r, warning=FALSE}
+abiome_c <- (ebd_merged_clean_4[77:96]) 
+```
+
+\
+
+Run PCA()
+```{r, warning=FALSE}
+abiome_pca<- PCA(abiome_c, scale.unit= TRUE, graph= FALSE)
+```
+
+\
+
+Get variables (provides a list of matrices containing all the results for the active variables) 
+```{r, warning=FALSE}
+var <- get_pca_var(abiome_pca)
+```
+
+\
+
+LOOK AT RESULTS:  
+1. get the eigenvalues of your PCA
+```{r, warning=FALSE}
+eig_val_anth <- get_eigenvalue(abiome_pca)
+eig_val_anth
+```
+
+\
+
+2. Generate a Scree plot of PCA
+```{r, warning=FALSE}
+anth_scree <- fviz_eig(abiome_pca, addlabels = TRUE, ylim = c(0, 50))
+anth_scree
+```
+
+\
+
+3. Examine the quality of representation of the variables (i.e., "cos2") 
+```{r, warning=FALSE}
+#corr plot (cos2):
+anth_cos2_corr <- corrplot(var$cos2, is.corr=FALSE)
+anth_cos2_corr
+
+# graph total cos2 on Dim.1 + Dim.2:
+anth_cos2_dims <- fviz_cos2(abiome_pca, choice = "var", axes = 1:2)
+anth_cos2_dims
+```
+
+\
+
+4. Contributions of variables to Principle Components
+```{r, warning=FALSE}
+head(var$contrib, 4)
+
+#corr plot
+anth_contrib_corr <- corrplot(var$contrib, is.corr=FALSE)
+anth_contrib_corr
+
+# Dim.1 contribution graph (red line = expected average contribution)
+anth_contrib_dim1 <- fviz_contrib(abiome_pca, choice = "var", axes = 1, top = 10)
+anth_contrib_dim1
+
+# Dim.2 contribution graph (red line = expected average contribution)
+anth_contrib_dim2 <- fviz_contrib(abiome_pca, choice = "var", axes = 2, top = 10)
+anth_contrib_dim2
+```
+
+\
+
+5. The most important (or, contributing) variables can be highlighted on the correlation plot as follow (PCA without Cos2):
+```{r, warning=FALSE}
+corr_plot_anth <- fviz_pca_var(abiome_pca, col.var = "contrib",
+                               gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE)
+corr_plot_anth
+```
+
+\
+
+6. Dimension description
+```{r, warning=FALSE}
+res.desc <- dimdesc(abiome_pca, axes = c(1,2), proba = 0.05)
+
+# Description of dimension 1
+res.desc$Dim.1  
+
+# Description of dimension 2
+res.desc$Dim.2 
+```
+
+\
+
+Extract PC values and bind to data 
+```{r, warning=FALSE}
+ind_anth <- get_pca_ind(abiome_pca)
+```
+
+\
+
+Transform "factoextra" class object into a "data.frame" class object
+```{r, warning=FALSE}
+df_pca_anth <- data.frame(ind_anth$coord)
+```
+
+\
+
+Bind the extracted pc scores to dfx, creating a new data frame
+```{r, warning=FALSE}
+ebd_merged_clean_4 <-cbind(ebd_merged_clean_4, df_pca_anth)
+```
+
+\
+
+Rename columns
+```{r, warning=FALSE}
+names(ebd_merged_clean_4)[names(ebd_merged_clean_4) == 'Dim.1'] <- 'PC1_developed'
+names(ebd_merged_clean_4)[names(ebd_merged_clean_4) == 'Dim.2'] <- 'PC2_developed'
+names(ebd_merged_clean_4)[names(ebd_merged_clean_4) == 'Dim.3'] <- 'PC3_developed'
+names(ebd_merged_clean_4)[names(ebd_merged_clean_4) == 'Dim.4'] <- 'PC4_developed'
+names(ebd_merged_clean_4)[names(ebd_merged_clean_4) == 'Dim.5'] <- 'PC5_developed'
+```
+
+
+\
+
+My goal for how the user would be able to explore the data was for them to be able to see the relationship between red-winged blackbird occurrence and land cover types in a simple, straightforward way, that is also interactive and dynamic (the maps), and then be able to explore the data in a more complex way, using statistics and graphs (the plots and statistics tabs). I chose this layout so that a wide audience could view and understand the app. These relationships can be represented in a variety of ways, and that is what I tried to show with this app.  
+
+I included drop-down menus to allow the user to choose dates and countries, so that they could understand the data in a more exploratory way, and come up with their own questions along the way.
+I also broke up the land cover types between the maps and the plots, so that within each land cover type category, comparison would be easier.  
+
+My app setup includes a Home page, a Maps tab, a Plots tab, a Statistics tab, and an About tab, with sub-tabs under each. I organized the app this way so that the user could move through it, starting at the Home tab, and ending with the About tab. As I mentioned previously, I think that it's useful to view the data in a simple, yet interactive way at first (using the Maps tabs), and then move onto the Plots and Statistics tabs to get a deeper understanding of the relationship. Perhaps the user formed hypotheses about the relationship between red-winged blackbird occurrence and particular land cover types while viewing the maps-- they can then see what the raw data, model, and statistics say.  
+
+My visualizations include a basic map without a land cover map, a general land cover type map, anthropogenic land cover type map, and an agricultural expansion map, all combined with red-winged blackbird occurrence points, filtered by the user based on their choice of country, month, and year.  
+```{r, warning = FALSE, echo = FALSE}
+sf_filtered_ebd <- filtered_ebd %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
+
+data(land)
+pal8 <- c("#33A02C", "#B2DF8A", "#FDBF6F", "#1F78B4", "#999999", "#E31A1C", "#E6E6E6", "#A6CEE3")
+tm_shape(land) +
+tm_raster("cover_cls", palette = pal8, title = "Global Land Cover") +
+tm_shape(sf_filtered_ebd) + tm_dots(col = "white") 
+
+
+```
+
+Next, I have plots, including a histogram where the user can explore variation in red-winged blackbird occurrence, based strictly off of the country and time of year. I included this because, although it doesn't include land cover data, I believe it's useful to think about the other variables that impact red-winged blackbird occurrence (i.e, what results one may see using the Maps tab). Some red-winged blackbird populations are migratory (Northern populations), which results in a variation of sightings throughout the year, depending on the country of interest. This also coincides with the species' breeding season-- sightings may be more common during the spring and summer months in Northern US and Canada as birds return to their breeding grounds, while sightings may be higher in the fall and winter months in the Southern portion of the species' range.  
+
+```{r, warning = FALSE, echo = FALSE}
+ggplot(data = filtered_ebd,
+       mapping = aes(x = month_name)) +
+  geom_histogram(stat = "count", color = "red", fill = "#FFC583") + 
+  facet_wrap(~ country, scales = "free_y", nrow = 3) +
+  labs(x = "Month", y = "Number of Sightings") +
+  theme_minimal()
+```
+
+
+\
+
+My other plots include logistic regressions of the raw data and data fit to a model, to allow the user to further investigate how red-winged blackbird occurrence relates to land cover type. This is an example using the environmental variables and the raw data:
+```{r, warning=FALSE, echo = FALSE, message = FALSE}
+p <-ggplot(melt_dfy, aes(x=value, y=pres_abs))
+p + geom_point() +
+  stat_smooth(method="glm", method.args=list(family="binomial"), se=TRUE)+
+  scale_x_continuous("Variables",limits = c(0.0, 100.0), breaks =
+                       c(20, 40, 60, 80))+
+  scale_y_continuous("Probability of occurrence",limits = c(0.0, 1.0),
+                     breaks = c(.0, 0.3, 0.6, 0.9))+
+  facet_grid(country~variable) +
+  theme(panel.background = element_blank(),
+        axis.title.x = element_text(size=10),
+        axis.title.y = element_text(size=16, angle=90),
+        axis.text.x = element_text(size=8),
+        axis.text.y = element_text(size=12),
+        strip.text.x = element_text(size = 14, colour = "black", angle = 60),
+        strip.text.y = element_text(size = 14, colour = "black", angle = 360)) +
+  theme_light()
+```
+
+\
+
+This is an example of the data fit to a model, with wetland as the response variable:
+```{r, echo = FALSE}
+lc_mod <- glm(pres_abs ~ p_temp_needleleaf_forest +
+                p_subpolartaiga_needleleaf_forest +
+                p_trop_broad_evergreen + 
+                p_trop_broad_deciduous +
+                p_temp_broad_deciduous +
+                p_mixed_forest +
+                p_trop_shrubland +
+                p_temp_shrubland +
+                p_trop_grassland +
+                p_temp_grassland +
+                p_wetland +
+                p_cropland +
+                p_barren.x +
+                p_urban.x,
+              data = ebd_merged_clean_4,
+              family = binomial(link = "logit"))
+
+    
+    visreg(lc_mod, gg=TRUE, xvar = "p_wetland", scale = "response")
+```
+
+\
+
+The underlying model used in the app is a generalized linear model, or specifically, a binomial logistic regression. This was used since the data is in the form of presence/absence. In this case, outcomes can either be 0 (absence) or 1 (presence).    
+The error generating process is binomial, and the shape of the data generating process is logistic (Yi∼B(Yi,size)) (log link function: Logit(Yi)=ηi) (Byrnes, 2020). Other sources of error may come from the fact that data is from citizen science-- sampling is not random, so some regions may have more sightings than others; and percents of different land cover types may not be accurate or up-to-date.  
+The assumptions of this model include the response variable being binary (presence/absence, in my case). The following code was also used to visualize the observed vs. expected residuals, and the residuals vs. the predicted values:
+```{r, warning=FALSE, echo=FALSE}
+plotQQunif(resids)
+plotResiduals(resids)
+```
+
+\
+
+These plots show that the expected and observed values are highly similar (first plot), as the points fall right along the line. The p-value for the KS test is 0.33187, meaning I fail to reject the null hypothesis. Deviation is non-significant. The dispersion test gives a high p-value of 0.976 (fail to reject the null hypothesis), with the deviation being non-significant.  
+
+I included an ANOVA output table. This provides the user with the p-value, which indicates whether the predictor variable "matters"-- in this case, whether land cover type predicts red-winged blackbird occurrence, or whether we fail to reject the null hypothesis that there is no association between the predictor and response variables.  
+```{r, echo=FALSE}
+tidy_lc_mod <- tidy(Anova(lc_mod))
+tidy_lc_mod
+```
+
+\
+
+I also included McFadden's pseudo r-squared for each of the binomial logistic regression models. This value is different from a typical R-squared value, as a lower value (between 0.2 and 0.4) can indicate a well-fit model (Hensher & Stophner, 1979). However, this value is typically used to compared two models, to determine which has a better fit.  
+```{r,echo=FALSE}
+piecewiseSEM::rsquared(lc_mod, method = "mcfadden")
+```
+
+\
+
+A link to the app is [here](https://mickaylaj.shinyapps.io/final/)
+
+#### Results  
+
+From my app and dataset, the user can learn what land cover types red-winged blackbirds most often associate with, and whether these land cover types are accurate predictors of red-winged blackbird occurrence. Specifically, a user can see from the maps that red-winged blackbirds are very commonly found in agricultural (cropland) areas, and wetland areas. The user can then confirm this by looking at the results of the logistic regression and the ANOVA.  
+
+\
+
+Results looking at wetland areas:  
+
+```{r, warning = FALSE, echo = FALSE, message = FALSE}
+# Plot
+visreg(lc_mod, gg=TRUE, xvar = "p_wetland", scale = "response")
+
+# ANOVA
+tidy_lc_mod %>%
+      filter(term == "p_wetland")
+
+```
+
+\
+
+Results looking at cropland areas:  
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+# Plot
+visreg(lc_mod, gg=TRUE, xvar = "p_cropland", scale = "response")
+
+# ANOVA
+tidy_lc_mod %>%
+      filter(term == "p_cropland")
+```
+
+\
+
+The results of the tests of these two variables show that the relationship is significant (p-values < 0.001). The plots also show that there is a positive relationship between red-winged blackbird occurrence and wetland land cover, as well as cropland land cover.  
+
+These analyses can be repeated with all of the land cover types, both general and anthropogenic. However, based on the app, some particularly interesting visualizations are the following:  
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+
+## PCA
+# get the relevant columns (variables) from the dataset for PCA
+abiome_c <- (ebd_merged_clean_4[77:96]) 
+
+# run PCA()
+abiome_pca<- PCA(abiome_c, scale.unit= TRUE, graph= FALSE)
+
+#extract individual values from the PCA
+ind_anth <- get_pca_ind(abiome_pca)
+
+#transform "factoextra" class object into a "data.frame" class object
+df_pca_anth <- data.frame(ind_anth$coord)
+#class(df_pca_anth)
+#^ df_pca_anth is a df of just my individual pc values (dim1-dim5)
+
+#bind the extracted pc scores to dfx, creating a new data frame
+ebd_merged_clean_4 <-cbind(ebd_merged_clean_4, df_pca_anth)
+
+#rename columns
+names(ebd_merged_clean_4)[names(ebd_merged_clean_4) == 'Dim.1'] <- 'PC1_developed'
+names(ebd_merged_clean_4)[names(ebd_merged_clean_4) == 'Dim.2'] <- 'PC2_developed'
+names(ebd_merged_clean_4)[names(ebd_merged_clean_4) == 'Dim.3'] <- 'PC3_developed'
+names(ebd_merged_clean_4)[names(ebd_merged_clean_4) == 'Dim.4'] <- 'PC4_developed'
+names(ebd_merged_clean_4)[names(ebd_merged_clean_4) == 'Dim.5'] <- 'PC5_developed'
+
+anthro_mod <- glm(pres_abs ~ PC1_developed,
+                  data = ebd_merged_clean_4,
+                  family = binomial(link = "logit"))
+
+visreg(anthro_mod, gg=TRUE, xvar = "PC1_developed", scale = "response")
+
+```
+
+\
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+visreg(lc_mod, gg=TRUE, xvar = "p_urban.x", scale = "response")
+```
+
+\
+
+The two above visualizations respresent the relationship between red-winged blackbird occurrence and anthropogenic areas, using PC1 from the PCA included in the app, and the relationship between red-winged blackbird occurrence and "urban" land cover. These show that the relationship with anthropogenic areas and red-winged blackbird occurrence is positive, while the opposite is shown for the relationship with urban land cover. I thought these were interesting because they show that there is some difference in the definition of "urban" vs "anthropogenic". Or, perhaps, there is an important difference in the relationship between soley "urban" land cover versus "anthropogenic" land cover and red-winged blackbird occurrence. This may have to do with the fact that anthropogenic land cover includes areas with suburban neighborhoods, where bird feeders and other human-subsidized resources are made available to birds. While "urban" areas may include more impervious surfaces, large buildings, less green-space, etc., that red-winged blackbirds do not "like." This may be an interesting differentiation to make between these land cover types in my study.  
+It is also possible that PC1 from the PCA should not have been used as the only response variable for the anthropogenic land cover type model.  
+Lastly, my app made me think about whether I should be including only data from the breeding season, as opposed to year-round data. This is because of the differences that can be seen in red-winged blackbird occurrence, depending on the time of year and the country.
+
+\
+
+#### Discussion  
+This app and data exploration showed that land cover does have a significant relationship with red-winged blackbird occurrence. As a result of my statistical analyses (i.e. p-values < 0.001) land cover types such as wetland and urban do have a significant relationship with red-winged blackbird occurrence. Other land cover types, as well as environmental variables, also have p-values that are at least < 0.05. I can therefore reject the null hypothesis that land cover type does not influence red-winged blackbird occurence.  
+
+From further exploring my app, I realized that, as mentioned previously, more research needs to be done to further differentiate between "urban" and "anthropogenic" land cover types, as it seems there may be a difference in the relationships between these two land cover types and red-winged blackbird occurrence.  
+
+I also learned that the anthropogenic land cover model must include less response variables (which is why I chose to include only PC1 from a PCA on these variables). After trying to fit a model using all of the anthropogenic land cover types as response variables and generate an ANOVA table, the results appeared to be inaccurate (the ANOVA output included all NAs and p-values of only 0). After doing some research on this, it appeared that my model included too many variables.    
+
+Some feeback I received on my app included the suggestion of including an additional dataset of land cover types/environmental variables. This data will be of finer detail/resolution, and will allow me to investigate the relationship between red-winged blackbird occurrence and land cover type at a finer scale. This is because this suggested dataset includes information on specific plant communities, which will allow me to investigate specific interactions between red-winged blackbirds and land cover types more easily.    
+
+In conclusion, my app and analyses showed that land cover type is an indicator of red-winged blackbird occurrence, and further analyses may be done to further investigate this relationship by including plant community information, as well as by further differentiating the land cover types of "urban" and "anthropogenic."  
+
+\
+
+#### References
+Assandri, G., Bogliani, G., Pedrini, P., & Brambilla, M. (2017). Land-use and bird occurrence at the urban margins in the Italian Alps: Implications for planning and conservation. North-Western Journal of Zoology, 13(1), 77–84.  
+
+Berg, Å., Wretenberg, J., Zmihorski, M., Hiron, M., & Pärt, T. (2015). Linking occurrence and changes in local abundance of farmland bird species to landscape composition and land-use changes. Agriculture, Ecosystems and Environment, 204, 1–7. https://doi.org/10.1016/j.agee.2014.11.019  
+
+Blackwell, B. F., & Dolbeer, R. A. (2001). Decline of the Red-Winged Blackbird Population in Ohio Correlated to Changes in Agriculture (1965-1996). The Journal of Wildlife Management, 65(4), 661. https://doi.org/10.2307/3803017  
+
+Byrnes, J. (2020). Generalized Linear Models. [PowerPoint slides]. Retrieved from https://biol355.github.io/Lectures/25_glm.html#/generalized-linear-models-errors.
+
+Commission for Environmental Cooperation (CEC), 2010. North America Landcover, 2010 (Landstat, 30m). http://www.cec.org/tools-and-resources/map-files/land-cover-2010-landsat-30m.  
+
+Ellis, E.C., and N. Ramankutty. 2008. Anthropogenic Biomes of the World, Version 1. Palisades, NY: NASA Socioeconomic Data and Applications Center (SEDAC). https://doi.org/10.7927/H4H12ZXD. Accessed 12 May 2019.
+
+Ellis, E.C., and N. Ramankutty. 2008. Putting People in the Map: Anthropogenic Biomes of the World. Frontiers in Ecology and the Environment 6 (8): 439-447. https://.doi.org/10.1890/070062.  
+
+EPA. (2013). Report on the Environment: Land Cover. Retrieved from https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=11&cad=rja&uact=8&ved=2ahUKEwjplNuVgP7kAhXpRd8KHRIECoQQFjAKegQIABAC&url=https%3A%2F%2Fcfpub.epa.gov%2Froe%2Findicator_pdf.cfm%3Fi%3D49&usg=AOvVaw2WaLVInwMVKB48oSpwglS3  
+
+Hensher, D. A., & Stopher, P. R. (Eds.). (1979). Quantitative Methods for Analyzing Travel Behaviour on Individuals: Some Recent Developments. In Behavioural travel modelling. Taylor & Francis.
+
+Kent, R., Bar-Massada, A., & Carmel, Y. (2014). Bird and mammal species composition in distinct geographic regions and their relationships with environmental factors across multiple spatial scales. Ecology and Evolution, 4(10), 1963–1971. https://doi.org/10.1002/ece3.1072  
+
+Lehner, B. and Döll, P. (2004): Development and validation of a global database of lakes,
+reservoirs and wetlands. Journal of Hydrology 296/1-4: 1-22.
+
+Matthew Strimas-Mackey, Eliot Miller, and Wesley Hochachka (2018). auk: eBird Data
+  Extraction and Processing with AWK. R package version 0.3.0.
+  https://cornelllabofornithology.github.io/auk/
+
+Murphy, M. T. (2003). Avian Population Trends Within the Evolving Agricultural Landscape of Eastern and Central United States. The Auk, 120(1), 20–34. https://doi.org/10.1093/auk/120.1.20  
+
+Rich, J. L., & Currie, D. J. (2018). Are North American bird species’ geographic ranges mainly determined by climate? Global Ecology and Biogeography, 27(4), 461–473. https://doi.org/10.1111/geb.12708
+
+Rittenhouse, C. D., Pidgeon, A. M., Albright, T. P., Culbert, P. D., Clayton, M. K., Flather, C. H., … Radeloff, V. C. (2012). Land-Cover Change and Avian Diversity in the Conterminous United States. Conservation Biology, 26(5), 821–829. https://doi.org/10.1111/j.1523-1739.2012.01867.x  
+
+Sullivan, B.L., C.L. Wood, M.J. Iliff, R.E. Bonney, D. Fink, and S. Kelling. 2009. eBird: a citizen-based bird observation network in the biological sciences. Biological Conservation 142: 2282-2292.  
+
+The Last of the Wild, Version Two. 2005. Global human influence index (HII). Wildlife Conservation Society (WCS), and Center for International Earth Science Information Network (CIESIN).
+
+

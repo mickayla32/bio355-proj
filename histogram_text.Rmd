@@ -1,0 +1,9 @@
+---
+output: html_document
+---
+
+These histograms show the variation in red-winged blackbird sightings depending on the country and time of year. This is interesting to note, as one can clearly see that sighting numbers are highest during the breeding season (typically during the spring and early summer months, though this varies depending on location) in the United States. In contrast, sightings in Mexico are highest in the winter months.  
+
+Along with this coinciding with breeding season, it also relates to the migration patterns of the birds. Northern populations (Northern US and Canada) migrate South during the winter months, thus the increase in sightings from Mexico. They then migrate North again beginning in January, and extending through May, thus the increase in sightings in the US during these months.
+
+See [this animation](https://ebird.org/science/status-and-trends/rewbla/abundance-map-weekly?forceLogin=true) from eBird to visualize red-winged blackbird migratory movement throughout the year

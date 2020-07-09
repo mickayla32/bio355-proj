@@ -1,0 +1,8 @@
+---
+output: html_document
+---
+
+Land cover is dynamic, particularly in the face of human-induced climate change. Shifts in natural land cover types to anthropogenic land cover types (agriculture and developed, i.e. urban) result in shifting bird species assemblages. Changes in land cover in the form of increasing agricultural land result in decreased crop heterogeneity, increased production and mechanization, as well as habitat loss, fragmentation, and increased agrochemical inputs (Blackwell & Dolbeer, 2001; Berg et al., 2014; Oliver & Morecroft, 2014). Developed areas, in the form of urban sprawl, can also result in habitat fragmentation and degradation, as well as invasion by exotic species (Assandri, 2017). These processes, in both agricultural and urban areas, can lead to a decrease in bird species richness and abundance, thus creating a more homogenized bird species assemblage. 
+
+
+The category of developed, or urbanized, land cover is especially relevant in terms of future worldwide land cover change—as of the 2011 NLCD report, 111 million acres of the contiguous United States was characterized as “developed”, with this category of land cover being the largest percent increase (4.7%) overall since 2001 (U.S., 2011).

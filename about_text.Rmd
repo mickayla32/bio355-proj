@@ -1,0 +1,61 @@
+---
+output: html_document
+---
+
+This Shiny App was created as a final project for a course called Intro to Data Science for Biology. It uses data collected from the citizen science website, eBird, for my Master's thesis first chapter, in which I'm exploring the question of, "How does landcover type effect red-winged blackbird occurrence across the species' range?" Or, put differently, "How well does landcover type predict red-winged blackbird occurrence across the species' range?"
+
+
+Occurrence data for red-winged blackbirds (Agelaius phoeniceus) was obtained from the eBird website via the eBird Basic Dataset (EBD) (which included the “World” and “Sampling Event Data” prepackaged options) (https://ebird.org/data/download). The R package auk was used to clean and filter the datasets (Strimas-Mackey, Miller, Hochachka, & Cornell Lab of Ornithology, 2019) (github.com/CornellLabofOrnithology/auk) . Data was filtered to include the species red-winged blackbird; the countries US, CA, MX, GT, BZ, SV, HN, NI, CR, and BS, with a latitude and longitude boundary of 8°00'00.0"N 172°00'00.0"W, and 72°00'00.0"N 52°00'00.0"W. The date range was set to January 1, 2015 to June 1, 2018 (which included the most reliable and up-to-date data at the time of processing). Checklist protocol was set to “travelling;” start time was set to 4:00 AM to 8:00 PM; duration was set to 25 minutes to 180 minutes; distance was set to 0 kilometers to 8 kilometers; and the “auk_complete” function was used, thus ensuring only checklists “in which all birds seen or heard were recorded” (Strimas-Mackey et al., 2019). These filters were chosen in order to include the most accurate, and stringent data collection methods were being used. EBD was then combined with the eBird Reference Dataset (ERD), which includes zero-filled and landscape data (https://ebird.org/data/download/erd). 
+
+
+This data was combined with a variety of GIS data in the program ArcMap-- landcover type, anthropogenic biome type, and environmental control variables, such as temperature, precipitation, and elevation. The resulting data includes percentages of each landcover type and anthropogenic type for each unique checklist ID (i.e. each presence or absence data point). This allows me to conduct analyses to explore my central question of how well landcover type predicts red-winged blackbird occurrence. 
+
+
+Check out the "Data" tab to see the full datasest.  
+
+#### Map References: 
+
+##### Land cover map reference:    
+Commission for Environmental Cooperation (CEC), 2010. North America Landcover, 2010 (Landstat, 30m). http://www.cec.org/tools-and-resources/map-files/land-cover-2010-landsat-30m.  
+
+##### Anthropogenic land cover types map reference:    
+Ellis, E.C., and N. Ramankutty. 2008. Anthropogenic Biomes of the World, Version 1. Palisades, NY: NASA Socioeconomic Data and Applications Center (SEDAC). https://doi.org/10.7927/H4H12ZXD. Accessed 12 May 2019.
+
+##### Agricultural map reference:    
+The Last of the Wild, Version Two. 2005. Global human influence index (HII). Wildlife Conservation Society (WCS), and Center for International Earth Science Information Network (CIESIN).  
+
+
+
+
+#### All References  
+
+
+
+Assandri, G., Bogliani, G., Pedrini, P., & Brambilla, M. (2017). Land-use and bird occurrence at the urban margins in the Italian Alps: Implications for planning and conservation. North-Western Journal of Zoology, 13(1), 77–84.    
+
+Berg, Å., Wretenberg, J., Zmihorski, M., Hiron, M., & Pärt, T. (2015). Linking occurrence and changes in local abundance of farmland bird species to landscape composition and land-use changes. Agriculture, Ecosystems and Environment, 204, 1–7. https://doi.org/10.1016/j.agee.2014.11.019  
+
+Blackwell, B. F., & Dolbeer, R. A. (2001). Decline of the Red-Winged Blackbird Population in Ohio Correlated to Changes in Agriculture (1965-1996). The Journal of Wildlife Management, 65(4), 661. https://doi.org/10.2307/3803017  
+
+Land Cover Classification System (LCCS): Classification Concepts and User Manual.
+Di Gregorio, A., and Jansen, L.J.M. Environment and Natural Resources Service, GCP/RAF/287/ITA Africover - East Africa Project and Soil Resources, Management and Conservation Service. 179 pages, 28 figures, 3 tables and including CD-ROM. FAO, Rome. 2000.  
+
+EPA. (2013). Report on the Environment: Land Cover. Retrieved from https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=11&cad=rja&uact=8&ved=2ahUKEwjplNuVgP7kAhXpRd8KHRIECoQQFjAKegQIABAC&url=https%3A%2F%2Fcfpub.epa.gov%2Froe%2Findicator_pdf.cfm%3Fi%3D49&usg=AOvVaw2WaLVInwMVKB48oSpwglS3  
+
+Kent, R., Bar-Massada, A., & Carmel, Y. (2014). Bird and mammal species composition in distinct geographic regions and their relationships with environmental factors across multiple spatial scales. Ecology and Evolution, 4(10), 1963–1971. https://doi.org/10.1002/ece3.1072  
+
+Murphy, M. T. (2003). Avian Population Trends Within the Evolving Agricultural Landscape of Eastern and Central United States. The Auk, 120(1), 20–34. https://doi.org/10.1093/auk/120.1.20
+
+Oliver, T. H., & Morecroft, M. D. (2014). Interactions between climate change and land use change on biodiversity: Attribution problems, risks, and opportunities. Wiley Interdisciplinary Reviews: Climate Change, 5(3), 317–335. https://doi.org/10.1002/wcc.271
+
+Rich, J. L., & Currie, D. J. (2018). Are North American bird species’ geographic ranges mainly determined by climate? Global Ecology and Biogeography, 27(4), 461–473. https://doi.org/10.1111/geb.12708  
+
+Rittenhouse, C. D., Pidgeon, A. M., Albright, T. P., Culbert, P. D., Clayton, M. K., Flather, C. H., … Radeloff, V. C. (2012). Land-Cover Change and Avian Diversity in the Conterminous United States. Conservation Biology, 26(5), 821–829. https://doi.org/10.1111/j.1523-1739.2012.01867.x  
+
+The Last of the Wild, Version Two. 2005. Global human influence index (HII). Wildlife Conservation Society (WCS), and Center for International Earth Science Information Network (CIESIN).
+
+U.S. EPA. EPA's Report On the Environment (ROE) (2011 Final Report). U.S. Environmental Protection Agency, Washington, D.C., EPA/600/R-07/045F (NTIS PB2008-112484), 2011.  
+
+
+
+By [Mickayla Johnston](https://www.linkedin.com/in/mickayla-johnston/)

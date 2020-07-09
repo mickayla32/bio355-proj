@@ -1,0 +1,21 @@
+---
+output: html_document
+runtime: shiny
+---
+
+<center>
+## Exploring the Effects of Landcover Type on Red-Winged Blackbirds (Agelaius phoeniceus)  
+##### By Mickayla Johnston
+
+Welcome to my Shiny app on exploring the effects of landcover type on red-winged blackbird occurrence. 
+
+On the navigation panel at the top, you will find tabs to explore interactive maps of red-winged blackbird occurrence across their North America range, explore interactive plots, view the original data, and learn more about the project. 
+
+This Shiny App was created as a final project for an R course at University of Massachuesetts Boston, and uses data gathered from my Master's thesis first chapter. Check out the 'About' tab to learn more.
+<center>
+
+
+<center>
+![](../pics/rwbb.jpg)
+<center>
+[© Jonathan Eckerson | Macaulay Library](https://macaulaylibrary.org/asset/49503081?__hstc=75100365.63ec5cb9b7d93982a68b42c127016450.1589150973257.1589150973257.1589150973257.1&__hssc=75100365.1.1589150973258&__hsfp=209927505#_ga=2.72505488.2095321367.1589150973-190327428.1589150970)

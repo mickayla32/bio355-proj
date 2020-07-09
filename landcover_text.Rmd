@@ -1,0 +1,14 @@
+---
+output: html_document
+---
+
+*Note that this map only includes US sightings
+
+
+Bird species’ distributions are dependent on a variety of biotic and abiotic conditions, such as interspecific and intraspecific species interactions, climate variables, ecoregions, land-use, and land cover variables. Such variables are drivers of habitat type and availability, vegetation type, predator occurrence, and more, all of which appear to be important factors in determining bird species’ distributions (Kent, Bar-Massada, & Carmel, 2014).
+
+
+Aside from climate variables and interspecies interactions, land cover appears to be an important factor in terms of predicting bird species’ occurrence and distributions (Rich & Currie, 2018). This is due to the fact that it can be a useful means for understanding and predicting changes in habitat type, as they relate to a particular species (EPA, 2013). Many studies, including Blackwell & Dolbeer (2001), Berg et al. (2015), Assandri et al. (2017), and Rittenhouse et al. (2012), have related land cover and changes in land cover to shifts in occurrence of a variety of bird species.  
+
+
+Land cover is determined by a variety of factors, including vegetation, climate, and human activity. As noted by the FAO Land Cover Classification System (LCCS), land cover can even be viewed as the “expression of human activities” (Di Gregorio and Jansen, 2000). Overall, land cover is a valuable indicator of ecosystem and habitat type, and is therefore a useful variable in determining bird species’ occurrence.
